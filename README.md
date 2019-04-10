@@ -1,2 +1,2 @@
 # BumpTracer
-Just a dumme read me file!!!!
+Just a dummy read me file!!!!
