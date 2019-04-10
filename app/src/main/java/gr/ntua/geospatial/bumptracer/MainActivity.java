@@ -120,7 +120,7 @@ public class MainActivity extends AppCompatActivity
 
                 Toast.makeText(con, "shake event detected count====" + count + ",  gForce==" + gForce, Toast.LENGTH_SHORT).show();
                // Location loc = getLastKnownLocation();
-                Log.d(TAG, "LOCATIONNNNNNNNNNNNNNNNNNNNNNN++++++++++++++++++ time===" + latestLocation);
+                Log.d(TAG, "LOCATIONNNNNNNNNNNNNNNNNNNNNNN++++++++++++++++++ ===" + latestLocation);
 
                 bumpEvents.add(new BumpEvent(gForce, count, 0, 0));
 
@@ -223,7 +223,11 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-
+    /**
+     * this is a void. When connected to location services
+     * configure the location request 
+     * @param bundle
+     */
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         locationRequest = new LocationRequest();
