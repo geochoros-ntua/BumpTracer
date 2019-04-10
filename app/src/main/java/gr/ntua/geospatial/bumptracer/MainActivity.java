@@ -49,6 +49,7 @@ public class MainActivity extends AppCompatActivity
     private static final String TAG = "MainActivity";
     private static final long LOCATION_REFRESH_TIME = 1; //in secs
     private static final float LOCATION_REFRESH_DISTANCE = 1; //meters
+    private static final long LOC_SHAKE_TIME_DIFF = 1; //in secs
     public static final int REQUEST_LOCATION = 197;
     static GoogleApiClient googleApiClient;
     LocationManager locationManager;
@@ -117,14 +118,25 @@ public class MainActivity extends AppCompatActivity
                 /*
                  * just any actions when shake event exist
                  */
+        if (latestLocation != null) {
+            long lastLocTime = latestLocation.getTime();
+            long nowLocTime = System.currentTimeMillis();
+            if ((nowLocTime-lastLocTime)<= LOC_SHAKE_TIME_DIFF*1000) {
+                Log.d(TAG, "lastLocTime" + lastLocTime);
 
                 Toast.makeText(con, "shake event detected count====" + count + ",  gForce==" + gForce, Toast.LENGTH_SHORT).show();
-               // Location loc = getLastKnownLocation();
+                // Location loc = getLastKnownLocation();
                 Log.d(TAG, "LOCATIONNNNNNNNNNNNNNNNNNNNNNN++++++++++++++++++ ===" + latestLocation);
 
                 bumpEvents.add(new BumpEvent(gForce, count, 0, 0));
 
-                tv.setText("Number of Bumps recorded = " + bumpEvents.size() + "latestt speed="+ latestSpeed + " last location ===" + latestLocation);
+                tv.setText("Number of Bumps recorded = " + bumpEvents.size() + "latestt speed=" + latestSpeed + " last location ===" + latestLocation);
+            } else {
+                Log.d(TAG,"Location obtained is too old.  may not ragister the bump event without a proper location!!!!!");
+            }
+        } else {
+            Log.d(TAG,"Location is null, may not ragister the bump event without location!!!!!");
+        }
 
 
             }
@@ -225,7 +237,7 @@ public class MainActivity extends AppCompatActivity
 
     /**
      * this is a void. When connected to location services
-     * configure the location request 
+     * configure the location request
      * @param bundle
      */
     @Override
@@ -239,42 +251,6 @@ public class MainActivity extends AppCompatActivity
                 .addLocationRequest(locationRequest);
         PendingResult<LocationSettingsResult> result =
                 LocationServices.SettingsApi.checkLocationSettings(googleApiClient, builder.build());
-        result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
-            @Override
-            public void onResult(LocationSettingsResult result) {
-                final Status status = result.getStatus();
-                //final LocationSettingsStates loc = result.getLocationSettingsStates();
-                switch (status.getStatusCode()) {
-                    case LocationSettingsStatusCodes.SUCCESS:
-                        // All location settings are satisfied. The client can initialize location
-                        // requests here.
-                        //...
-                        Log.d(TAG,"THIS IS NICE!!!!!!");
-
-                        break;
-                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-                        Log.d(TAG,"THIS IS NTO VERY NICE. USER MAST ENABLE IT!!!!!!");
-                        // Location settings are not satisfied. But could be fixed by showing the user
-                        // a dialog.
-                        try {
-                            // Show the dialog by calling startResolutionForResult(),
-                            // and check the result in onActivityResult().
-                            status.startResolutionForResult(
-                                    MainActivity.this,
-                                    1000);
-                        } catch (IntentSender.SendIntentException e) {
-                            // Ignore the error.
-                        }
-                        break;
-                    case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
-                        Log.d(TAG,"THIS IS A PROBLEM. NOT MUCH WE CAN DO!!!!!!");
-                        // Location settings are not satisfied. However, we have no way to fix the
-                        // settings so we won't show the dialog.
-                        //...
-                        break;
-                }
-            }
-        });
 
 
         if (ContextCompat.checkSelfPermission(this,
@@ -295,17 +271,7 @@ public class MainActivity extends AppCompatActivity
     public void onLocationChanged(Location location) {
         Log.d(TAG,"onLocationChanged loc changeD");
         latestLocation = location;
-        if (location==null){
-            // if you can't get speed because reasons :)
-            latestSpeed = 0;
-        }
-        else{
-            //int speed=(int) ((location.getSpeed()) is the standard which returns meters per second. In this example i converted it to kilometers per hour
 
-            int speed=(int) ((location.getSpeed()*3600)/1000);
-            latestSpeed = speed;
-
-        }
     }
 
     @Override
