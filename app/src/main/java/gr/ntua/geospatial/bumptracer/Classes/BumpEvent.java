@@ -1,5 +1,10 @@
 package gr.ntua.geospatial.bumptracer.Classes;
 
+/**
+ * This is the class to represent the object of bumps
+ * Represents the values to hold
+ * and any methods
+ */
 public class BumpEvent {
     public float gForce = 0;
     public int count = 0;
@@ -14,4 +19,5 @@ public class BumpEvent {
         this.lon = lon;
 
     }
+    //Place here any methods
 }

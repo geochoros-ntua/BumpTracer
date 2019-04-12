@@ -6,6 +6,12 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.util.Log;
 
+
+/**
+ * BumpDetecor is the class to manipulate  the accelerometer sensor
+ * Implements a sensor listener
+ * and executes  some logic to measure the intensity of shakes
+ */
 public class BumpDetector implements SensorEventListener {
 
     /*

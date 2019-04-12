@@ -1,9 +1,18 @@
 package gr.ntua.geospatial.bumptracer.Utils;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.provider.Settings;
+import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
+import android.util.Log;
+import android.widget.Toast;
+
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.tasks.Task;
 
 public class Utils {
     /**
@@ -34,6 +43,10 @@ public class Utils {
 
 
     }
+
+
+
+
 
 
 }
