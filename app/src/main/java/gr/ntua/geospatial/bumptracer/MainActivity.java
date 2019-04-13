@@ -1,26 +1,15 @@
 package gr.ntua.geospatial.bumptracer;
 
 import android.Manifest;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentSender;
 import android.content.ServiceConnection;
-import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
-import android.os.Binder;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -30,27 +19,11 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Status;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.location.LocationSettingsResult;
-import com.google.android.gms.location.LocationSettingsStatusCodes;
-
-import java.lang.Class;
 import java.util.ArrayList;
 
 import gr.ntua.geospatial.bumptracer.Classes.BumpDetector;
 import gr.ntua.geospatial.bumptracer.Classes.BumpEvent;
 import gr.ntua.geospatial.bumptracer.Classes.LocationService;
-import gr.ntua.geospatial.bumptracer.Utils.Utils;
-
-import static com.google.android.gms.location.LocationRequest.*;
 
 public class MainActivity extends AppCompatActivity {
 

@@ -1,4 +1,11 @@
 package gr.ntua.geospatial.bumptracer.Classes;
+/**
+ * This is the class to handle location service
+ * It is executed as a service, so make sure it still works on the background no matter what
+ * Might not be necessary but it will run for sure
+ * and also helps to keep location functionality together as a separate class
+ * Author: p.tsagkis@gmail.com
+ */
 
 import android.Manifest;
 import android.app.Activity;
@@ -37,20 +44,37 @@ import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.location.LocationListener;
 
 import gr.ntua.geospatial.bumptracer.MainActivity;
-import gr.ntua.geospatial.bumptracer.Utils.Utils;
 
 
-public class LocationService extends Service implements LocationListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+/**
+ * Here is the service class
+ * implementing LocationListener as well as google api client
+ * Google api client is implemented to grant permissions and
+ * to show the default dialog to enable GPS
+ */
+public class LocationService extends Service implements
+        LocationListener,
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener {
 
-    private LocationManager locationManager;
-    public Location location;
-    public LocationListener listen;
-    GoogleApiClient mGoogleApiClient;
-
-    private static final long LOCATION_REFRESH_TIME = 0; //in secs
+    //declare some properties here
+    private static final long LOCATION_REFRESH_TIME = 100; //in msecs
     private static final float LOCATION_REFRESH_DISTANCE = 1; //meters
     private static final String TAG = "LocationService";
+    private GoogleApiClient mGoogleApiClient;
+    private LocationManager locationManager;
+    //declare it public so we can use in our main activity
+    public Location location;
 
+
+    /**
+     * This is the start command. It is executed on fav1 click button
+     * inside out main activity
+     * @param intent
+     * @param flags
+     * @param startId
+     * @return
+     */
     @Override
     public int onStartCommand(final Intent intent, final int flags, final int startId) {
 
@@ -63,10 +87,8 @@ public class LocationService extends Service implements LocationListener, Google
 
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                     ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                Log.d(TAG, "should ask permission");
+                Log.d(TAG, "no permission granted");
 
-
-               // locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, LOCATION_REFRESH_TIME, LOCATION_REFRESH_DISTANCE, listen);
             } else {
                 askToEnableLocServices(MainActivity.con);
             }
@@ -84,10 +106,6 @@ public class LocationService extends Service implements LocationListener, Google
         locationManager = null;
     }
 
-
-
-
-
     @Override
     public IBinder onBind(final Intent intent) {
         return null;
@@ -95,20 +113,13 @@ public class LocationService extends Service implements LocationListener, Google
 
     public void onLocationChanged(Location location) {
         this.location = location;
-        listen = this;
+        //listen = this;
         Log.d(TAG, "onLocationChanged");
         // TODO this is where you'd do something like context.sendBroadcast()
     }
 
 
 
-    public void onProviderDisabled(final String provider) {
-        Log.d(TAG, "onProviderDisabled");
-    }
-
-    public void onProviderEnabled(final String provider) {
-        Log.d(TAG, "onProviderEnabled");
-    }
 
 
     /**
@@ -130,9 +141,6 @@ public class LocationService extends Service implements LocationListener, Google
                         .build();
                 mGoogleApiClient.connect();
 
-
-
-
             } else {
                 Log.d(TAG, "no permissions to get the location!!!!!");
                 Toast.makeText(con, "permission denide", Toast.LENGTH_SHORT).show();
@@ -140,10 +148,11 @@ public class LocationService extends Service implements LocationListener, Google
         } else {
             //buildGoogleApiClient();
 
+
         }
     }
 
-    LocationRequest locationRequest;
+
     LocationCallback mLocationCallback = new LocationCallback() {
         @Override
         public void onLocationResult (LocationResult locationResult){
@@ -159,8 +168,9 @@ public class LocationService extends Service implements LocationListener, Google
     public void onConnected(@Nullable Bundle bundle) {
         LocationRequest locationRequest = LocationRequest.create();
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        locationRequest.setInterval(LOCATION_REFRESH_TIME * 1000);
-        locationRequest.setFastestInterval(LOCATION_REFRESH_TIME * 1000);
+        locationRequest.setInterval(LOCATION_REFRESH_TIME);
+        locationRequest.setFastestInterval(LOCATION_REFRESH_TIME);
+        locationRequest.setSmallestDisplacement(LOCATION_REFRESH_DISTANCE);
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
                 .addLocationRequest(locationRequest);
         builder.setAlwaysShow(true); //this is the key ingredient
