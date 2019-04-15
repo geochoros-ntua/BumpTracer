@@ -47,7 +47,7 @@ public class LocationService extends Service implements LocationListener, Google
     public LocationListener listen;
     GoogleApiClient mGoogleApiClient;
 
-    private static final long LOCATION_REFRESH_TIME = 0; //in secs
+    private static final long LOCATION_REFRESH_TIME = 1; //in secs
     private static final float LOCATION_REFRESH_DISTANCE = 1; //meters
     private static final String TAG = "LocationService";
 
