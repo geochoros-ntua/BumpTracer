@@ -1,26 +1,14 @@
 package gr.ntua.geospatial.bumptracer;
 
 import android.Manifest;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentSender;
 import android.content.ServiceConnection;
-import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
-import android.os.Binder;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -30,48 +18,33 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Status;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.location.LocationSettingsResult;
-import com.google.android.gms.location.LocationSettingsStatusCodes;
-
-import java.lang.Class;
 import java.util.ArrayList;
 
 import gr.ntua.geospatial.bumptracer.Classes.BumpDetector;
 import gr.ntua.geospatial.bumptracer.Classes.BumpEvent;
 import gr.ntua.geospatial.bumptracer.Classes.LocationService;
-import gr.ntua.geospatial.bumptracer.Utils.Utils;
-
-import static com.google.android.gms.location.LocationRequest.*;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
     private static final long LOC_SHAKE_TIME_DIFF = 1; //in secs
     public static final int REQUEST_LOCATION = 197;
-
-    private Location latestLocation = null;
-    private int latestSpeed = 0;
-
-
-
     private SensorManager mSensorManager;
     private Sensor mAccelerometer;
     private BumpDetector mShakeDetector;
     public static Context con;
     private ArrayList<BumpEvent> bumpEvents = new ArrayList<BumpEvent>();
-    TextView tv;
+    public static TextView tv;
     ServiceConnection SCon;
 
 
+    /**
+     * The main Activity holding the UI.
+     * 2 fab buttons two start/stop shake and location services
+     * A dummy toolbar
+     * and a piece of logic for the shake event
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -84,12 +57,12 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         final Class<?> LocationServiceMonitor = LocationService.class;
-
+        //Request location permissions on start up
          ActivityCompat.requestPermissions(this,
-                new String[]{Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION},
+                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                 REQUEST_LOCATION);
 
-
+        //set the button actions
         FloatingActionButton fab1 = (FloatingActionButton) findViewById(R.id.fab1);
         fab1.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -109,8 +82,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Toast.makeText(con, "stop listening", Toast.LENGTH_SHORT).show();
-                //register the listener to trace bump events
+                //unregister the listener for bump events
                 mSensorManager.unregisterListener(mShakeDetector);
+                //Stop The location service
                 con.stopService(new Intent(con, LocationServiceMonitor));
             }
         });
@@ -119,6 +93,9 @@ public class MainActivity extends AppCompatActivity {
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         mShakeDetector = new BumpDetector();
+        /*
+         *  Register the listener for accelerometer
+         */
         mShakeDetector.setOnShakeListener(new BumpDetector.OnShakeListener() {
 
             @Override
@@ -126,25 +103,25 @@ public class MainActivity extends AppCompatActivity {
                 /*
                  * just any actions when shake event exist
                  */
-        if (latestLocation != null) {
-            long lastLocTime = latestLocation.getTime();
-            long nowLocTime = System.currentTimeMillis();
-            if ((nowLocTime-lastLocTime)<= LOC_SHAKE_TIME_DIFF*1000) {
-                Log.d(TAG, "lastLocTime" + lastLocTime);
+                if (LocationService.latestLocation != null) {
+                    long lastLocTime = LocationService.latestLocation.getTime();
+                    long nowLocTime = System.currentTimeMillis();
+                    if ((nowLocTime-lastLocTime)<= LOC_SHAKE_TIME_DIFF*1000) {
+                        Log.d(TAG, "lastLocTime" + lastLocTime);
 
-                Toast.makeText(con, "shake event detected count====" + count + ",  gForce==" + gForce, Toast.LENGTH_SHORT).show();
-                // Location loc = getLastKnownLocation();
-                Log.d(TAG, "LOCATIONNNNNNNNNNNNNNNNNNNNNNN++++++++++++++++++ ===" + latestLocation);
+                        Toast.makeText(con, "shake event detected count====" + count + ",  gForce==" + gForce, Toast.LENGTH_SHORT).show();
+                        // Location loc = getLastKnownLocation();
+                        Log.d(TAG, "LOCATIONNNNNNNNNNNNNNNNNNNNNNN++++++++++++++++++ ===" + LocationService.latestLocation);
 
-                bumpEvents.add(new BumpEvent(gForce, count, 0, 0));
+                        bumpEvents.add(new BumpEvent(gForce, count,LocationService.latestLocation));
 
-                tv.setText("Number of Bumps recorded = " + bumpEvents.size() + "latestt speed=" + latestSpeed + " last location ===" + latestLocation);
-            } else {
-                Log.d(TAG,"Location obtained is too old.  may not register the bump event without a proper location!!!!!");
-            }
-        } else {
-            Log.d(TAG,"Location is null, may not register the bump event without location!!!!!");
-        }
+                        tv.setText("Number of Bumps recorded = " + bumpEvents.size() + " last location ===" + LocationService.latestLocation);
+                    } else {
+                        Log.d(TAG,"Location obtained is too old.  may not register the bump event without a proper location!!!!!");
+                    }
+                } else {
+                    Log.d(TAG,"Location is null, may not register the bump event without location!!!!!");
+                }
 
 
             }
@@ -187,9 +164,6 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * THIS POITN FORWARD ACTIONS RELATED TO THE PERMISSIONS FOR LOCATION SERVICES
-     */
 
 
 

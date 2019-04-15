@@ -16,7 +16,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <service android:enabled="true" android:name="gr.ntua.geospatial.bumptracer.Classes.LocationService" />
+        <service
+            android:name="gr.ntua.geospatial.bumptracer.Classes.LocationService"
+            android:enabled="true"
+            android:stopWithTask="true"
+        />
         <activity
             android:name=".MainActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
